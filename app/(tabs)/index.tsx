@@ -1,58 +1,34 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text } from 'react-native';
+import { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, Text } from "react-native";
 
-import { View } from '@/components/Themed';
-import { fetchTopRatedMovies } from '@/api/movies';
+import { View } from "@/components/Themed";
+import { fetchTopRatedMovies } from "@/api/movies";
+import { useQuery } from "@tanstack/react-query";
+import MovieListItem from '@/components/MovieListItem';
 
 export default function TabOneScreen() {
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const  {
+    data: movies,
+    isLoading,
+    error,
+  } = useQuery({ queryKey: ["movies"], queryFn: fetchTopRatedMovies });
 
-  useEffect(() => {
-    const fetchMovies = async() => {
-      setIsLoading(true);
-
-      try {
-
-        const movies = await fetchTopRatedMovies();
-        setMovies(movies)
-        console.log(movies);
-      }
-      catch (error) {
-        setError(error);
-      }
-
-      setIsLoading(false)
-    }
-
-    fetchMovies();
-
-
-  }, []);
-
-  if(isLoading){
-    return (
-      <ActivityIndicator size="large" color="#0000ff" />
-    )
+  if (isLoading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   if (error) {
-    return ( <Text>{error.message} </Text>)
+    return <Text>{error.message} </Text>;
   }
-
 
   return (
     <View style={styles.container}>
       <FlatList
-      data={movies}
-      renderItem={({item}) =>(
-        <View>
-          <Text>{item.title}</Text>
-        </View>
-      )
-      }
-
+        data={movies}
+        numColumns={2}
+        contentContainerStyle={{gap: 5, padding: 5}}
+        columnWrapperStyle={{gap: 5}}
+        renderItem={({ item }) => <MovieListItem movie={item} />}
       />
     </View>
   );
@@ -61,8 +37,6 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
+  },
 });
